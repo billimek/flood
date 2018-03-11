@@ -3,6 +3,7 @@ import {injectIntl} from 'react-intl';
 import React from 'react';
 
 import Modal from '../Modal';
+import Tags from '../../general/form-elements/Tags';
 import TorrentActions from '../../../actions/TorrentActions';
 import TorrentStore from '../../../stores/TorrentStore';
 
@@ -57,7 +58,7 @@ class SetTagsModal extends React.Component {
       <div className="modal__content inverse">
         <Form ref={ref => this.formRef = ref}>
           <FormRow>
-            <Textbox
+            <Tags
               defaultValue={tagsValue}
               id="tags"
               placeholder={this.props.intl.formatMessage({

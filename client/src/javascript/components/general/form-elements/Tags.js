@@ -1,11 +1,13 @@
 import _ from 'lodash';
-import {ContextMenu, Portal, Textbox} from 'flood-ui-kit';
+import {ContextMenu, Portal, FormElementAddon, Textbox} from 'flood-ui-kit';
 import {FormattedMessage, injectIntl} from 'react-intl';
 import React from 'react';
 
+import CustomScrollbars from '../CustomScrollbars';
 import EventTypes from '../../../constants/EventTypes';
 import Search from '../../../components/icons/Search';
 import UIStore from '../../../stores/UIStore';
+import TorrentFilterStore from '../../../stores/TorrentFilterStore';
 
 class Tags extends React.Component{
   contextMenuInstanceRef = null;
@@ -50,7 +52,7 @@ class Tags extends React.Component{
     global.addEventListener('resize', this.handleWindowResize);
   }
 
-  closeDirectoryList = () => {
+  closeTagsList = () => {
     if (this.state.isTagsListOpen) {
       this.setState({isTagsListOpen: false});
     }
@@ -66,6 +68,13 @@ class Tags extends React.Component{
 
   handleTagsChange = (event) => {
     const tags = event.target.value;
+    
+    if (!this.state.isTagsListOpen){
+      this.setState({
+        isTagsListOpen: true,
+        isFetching: true
+      });
+    }
 
     if (this.props.onChange) {
       this.props.onChange(tags);
@@ -83,22 +92,27 @@ class Tags extends React.Component{
     });
   };
 
-  handleTagSelection = tags => {
+  handleTagClick = tag => {
+    const currentTagsValue = this.state.textboxRef.value;
+    const completedTags = currentTagsValue.slice(0, currentTagsValue.lastIndexOf(',') + 1);
+    const newTags = `${completedTags} ${tag},`;
+    console.log(newTags);
+
     // eslint-disable-next-line react/no-direct-mutation-state
-    this.state.textboxRef.value = tags;
-    this.setState({tags});
+    this.state.textboxRef.value = newTags;
+    this.setState({tags: newTags});
   };
 
   handleDocumentClick = () => {
-    this.closeDirectoryList();
+    this.closeTagsList();
   };
 
   handleModalDismiss = () => {
-    this.closeDirectoryList();
+    this.closeTagsList();
   };
 
   handleWindowResize = () => {
-    this.closeDirectoryList();
+    this.closeTagsList();
   };
 
   removeTagsOpenEventListeners() {
@@ -118,7 +132,35 @@ class Tags extends React.Component{
     });
   };
 
+  getTagsList(){
+    let allTags = TorrentFilterStore.getTorrentTagCount();
+    delete allTags.all;
+    delete allTags.untagged;
+    let currentTags = this.state.textboxRef ?
+                        this.state.textboxRef.value ? this.state.textboxRef.value.split(',') 
+                          : []
+                        : [];
+
+    let tags = Object.keys(allTags).filter((element) => {
+      return (currentTags.indexOf(element) === -1)
+    });
+
+    const tagsList = tags.map((tag) => {
+      return(
+        <li
+          className="filesystem__directory-list__item"
+          key={tag}
+          onClick={() => this.handleTagClick(tag)}
+        >
+            {tag}
+        </li>
+      );
+    });
+    return tagsList;
+  }
+
   render() {
+    let tagsList = this.getTagsList()
     return (
       <Textbox
         addonPlacement="after"
@@ -144,7 +186,20 @@ class Tags extends React.Component{
             scrolling={false}
             triggerRef={this.state.textboxRef}
           >
-            <FilesystemBrowser
+            <CustomScrollbars
+              autoHeight={true}
+              autoHeightMin={0}
+              autoHeightMax={
+                this.contextMenuInstanceRef
+                && this.contextMenuInstanceRef.dropdownStyle
+                && this.contextMenuInstanceRef.dropdownStyle.maxHeight
+              }
+            >
+              <div className="filesystem__directory-list context-menu__items__padding-surrogate">
+                {tagsList}
+              </div>
+            </CustomScrollbars>
+            {/*<FilesystemBrowser
               directory={this.state.tags}
               intl={this.props.intl}
               maxHeight={
@@ -153,7 +208,7 @@ class Tags extends React.Component{
                 && this.contextMenuInstanceRef.dropdownStyle.maxHeight
               }
               onDirectorySelection={this.handleDirectorySelection}
-            />
+            />*/}
           </ContextMenu>
         </Portal>
       </Textbox>
