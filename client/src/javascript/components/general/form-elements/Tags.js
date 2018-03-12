@@ -118,9 +118,19 @@ class Tags extends React.Component{
 
   handleKeyPress = (event) => {
     if (event.keyCode === 9){
-      event.preventDefault();
-        if (this.tagsList[0])
+      const currentTagsValue = this.state.textboxRef.value;
+      const newTag = currentTagsValue.slice(currentTagsValue.lastIndexOf(',') + 1).trim();
+
+      if (newTag){
+        event.preventDefault();
+        if (this.tagsList[0]){
           this.handleTagClick(this.tagsList[0]);
+        } else {
+          this.handleTagClick(newTag);
+        }
+      } else {
+        this.closeTagsList();
+      }
     }
   }
 
