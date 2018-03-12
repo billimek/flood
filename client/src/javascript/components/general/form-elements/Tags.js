@@ -152,7 +152,7 @@ class Tags extends React.Component{
   };
 
   getTagsList(){
-    const allTags = TorrentFilterStore.getTorrentTagCount();
+    const allTags = Object.assign({}, TorrentFilterStore.getTorrentTagCount());
     delete allTags.all;
     delete allTags.untagged;
 
