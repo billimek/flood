@@ -1,4 +1,4 @@
-import {Form, FormRow, Textbox} from 'flood-ui-kit';
+import {Form, FormRow} from 'flood-ui-kit';
 import {injectIntl} from 'react-intl';
 import React from 'react';
 

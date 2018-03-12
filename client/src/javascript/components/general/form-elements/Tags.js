@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import {ContextMenu, Portal, FormElementAddon, Textbox} from 'flood-ui-kit';
-import {FormattedMessage, injectIntl} from 'react-intl';
+import {injectIntl} from 'react-intl';
 import React from 'react';
 
 import CustomScrollbars from '../CustomScrollbars';
@@ -12,6 +12,7 @@ import TorrentFilterStore from '../../../stores/TorrentFilterStore';
 class Tags extends React.Component{
   contextMenuInstanceRef = null;
   contextMenuNodeRef = null;
+  tagslist = [];
 
   constructor(props) {
     super(props);
@@ -21,6 +22,7 @@ class Tags extends React.Component{
 
     this.state = {
       tags,
+      tagsList: [],
       error: null,
       isFetching: false,
       isTagsListOpen: false
@@ -95,8 +97,7 @@ class Tags extends React.Component{
   handleTagClick = tag => {
     const currentTagsValue = this.state.textboxRef.value;
     const completedTags = currentTagsValue.slice(0, currentTagsValue.lastIndexOf(',') + 1);
-    const newTags = `${completedTags} ${tag},`;
-    console.log(newTags);
+    const newTags = `${completedTags?completedTags+' ':''}${tag}, `;
 
     // eslint-disable-next-line react/no-direct-mutation-state
     this.state.textboxRef.value = newTags;
@@ -114,6 +115,14 @@ class Tags extends React.Component{
   handleWindowResize = () => {
     this.closeTagsList();
   };
+
+  handleKeyPress = (event) => {
+    if (event.keyCode === 9){
+      event.preventDefault();
+        if (this.tagsList[0])
+          this.handleTagClick(this.tagsList[0]);
+    }
+  }
 
   removeTagsOpenEventListeners() {
     global.document.removeEventListener('click', this.handleDocumentClick);
@@ -133,19 +142,22 @@ class Tags extends React.Component{
   };
 
   getTagsList(){
-    let allTags = TorrentFilterStore.getTorrentTagCount();
+    const allTags = TorrentFilterStore.getTorrentTagCount();
     delete allTags.all;
     delete allTags.untagged;
-    let currentTags = this.state.textboxRef ?
-                        this.state.textboxRef.value ? this.state.textboxRef.value.split(',') 
-                          : []
-                        : [];
 
-    let tags = Object.keys(allTags).filter((element) => {
-      return (currentTags.indexOf(element) === -1)
+    const currentTagsValue = this.state.textboxRef ? this.state.textboxRef.value : '';
+    const searchTerm = currentTagsValue.slice(currentTagsValue.lastIndexOf(',') + 1).trim();
+    const currentTags = currentTagsValue ? currentTagsValue.split(',').map( (element) => element.trim()) : [];
+
+    const tagsList = Object.keys(allTags).filter((element) => {
+      return (currentTags.indexOf(element.trim()) === -1);
+    }).filter( (element) => {
+      return (element.indexOf(searchTerm.trim()) !== -1);
     });
+    this.tagsList = tagsList;
 
-    const tagsList = tags.map((tag) => {
+    const tagsListElements = tagsList.map((tag) => {
       return(
         <li
           className="filesystem__directory-list__item"
@@ -156,62 +168,68 @@ class Tags extends React.Component{
         </li>
       );
     });
-    return tagsList;
+    return tagsListElements;
   }
 
   render() {
     let tagsList = this.getTagsList()
     return (
-      <Textbox
-        addonPlacement="after"
-        defaultValue={this.state.tags}
-        id={this.props.id}
-        label={this.props.label}
-        onChange={this.handleTagsChange}
-        onClick={event => event.nativeEvent.stopImmediatePropagation()}
-        placeholder={this.props.placeholder}
-        setRef={this.setTextboxRef}
+      <div 
+        style={{width: 'inherit'}}
+        onKeyDown={this.handleKeyPress}
       >
-        <FormElementAddon onClick={this.handleTagsListButtonClick}>
-          <Search />
-        </FormElementAddon>
-        <Portal>
-          <ContextMenu
-            in={this.state.isTagsListOpen}
-            onClick={event => event.nativeEvent.stopImmediatePropagation()}
-            overlayProps={{isInteractive: false}}
-            padding={false}
-            ref={ref => this.contextMenuInstanceRef = ref}
-            setRef={ref => this.contextMenuNodeRef = ref}
-            scrolling={false}
-            triggerRef={this.state.textboxRef}
-          >
-            <CustomScrollbars
-              autoHeight={true}
-              autoHeightMin={0}
-              autoHeightMax={
-                this.contextMenuInstanceRef
-                && this.contextMenuInstanceRef.dropdownStyle
-                && this.contextMenuInstanceRef.dropdownStyle.maxHeight
-              }
+        <Textbox
+          addonPlacement="after"
+          defaultValue={this.state.tags}
+          id={this.props.id}
+          label={this.props.label}
+          onChange={this.handleTagsChange}
+          onClick={event => event.nativeEvent.stopImmediatePropagation()}
+          placeholder={this.props.placeholder}
+          setRef={this.setTextboxRef}
+          width="auto"
+        >
+          <FormElementAddon onClick={this.handleTagsListButtonClick}>
+            <Search />
+          </FormElementAddon>
+          <Portal>
+            <ContextMenu
+              in={this.state.isTagsListOpen}
+              onClick={event => event.nativeEvent.stopImmediatePropagation()}
+              overlayProps={{isInteractive: false}}
+              padding={false}
+              ref={ref => this.contextMenuInstanceRef = ref}
+              setRef={ref => this.contextMenuNodeRef = ref}
+              scrolling={false}
+              triggerRef={this.state.textboxRef}
             >
-              <div className="filesystem__directory-list context-menu__items__padding-surrogate">
-                {tagsList}
-              </div>
-            </CustomScrollbars>
-            {/*<FilesystemBrowser
-              directory={this.state.tags}
-              intl={this.props.intl}
-              maxHeight={
-                this.contextMenuInstanceRef
-                && this.contextMenuInstanceRef.dropdownStyle
-                && this.contextMenuInstanceRef.dropdownStyle.maxHeight
-              }
-              onDirectorySelection={this.handleDirectorySelection}
-            />*/}
-          </ContextMenu>
-        </Portal>
-      </Textbox>
+              <CustomScrollbars
+                autoHeight={true}
+                autoHeightMin={0}
+                autoHeightMax={
+                  this.contextMenuInstanceRef
+                  && this.contextMenuInstanceRef.dropdownStyle
+                  && this.contextMenuInstanceRef.dropdownStyle.maxHeight
+                }
+              >
+                <div className="filesystem__directory-list context-menu__items__padding-surrogate">
+                  {tagsList}
+                </div>
+              </CustomScrollbars>
+              {/*<FilesystemBrowser
+                directory={this.state.tags}
+                intl={this.props.intl}
+                maxHeight={
+                  this.contextMenuInstanceRef
+                  && this.contextMenuInstanceRef.dropdownStyle
+                  && this.contextMenuInstanceRef.dropdownStyle.maxHeight
+                }
+                onDirectorySelection={this.handleDirectorySelection}
+              />*/}
+            </ContextMenu>
+          </Portal>
+        </Textbox>
+      </div>
     );
   }
 }
