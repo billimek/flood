@@ -5,7 +5,7 @@ import React from 'react';
 
 import CustomScrollbars from '../CustomScrollbars';
 import EventTypes from '../../../constants/EventTypes';
-import Search from '../../../components/icons/Search';
+import Add from '../../../components/icons/Add';
 import UIStore from '../../../stores/UIStore';
 import TorrentFilterStore from '../../../stores/TorrentFilterStore';
 
@@ -200,7 +200,7 @@ class Tags extends React.Component{
           width="auto"
         >
           <FormElementAddon onClick={this.handleTagsListButtonClick}>
-            <Search />
+            <Add/>
           </FormElementAddon>
           <Portal>
             <ContextMenu
