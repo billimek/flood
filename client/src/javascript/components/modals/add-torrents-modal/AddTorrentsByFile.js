@@ -1,9 +1,10 @@
 import {FormattedMessage, injectIntl} from 'react-intl';
-import {Form, FormRow, FormRowItem, Textbox} from 'flood-ui-kit';
+import {Form, FormRow, FormRowItem} from 'flood-ui-kit';
 import Dropzone from 'react-dropzone';
 import React from 'react';
 
 import AddTorrentsActions from './AddTorrentsActions';
+import Tags from '../../general/form-elements/Tags';
 import Close from '../../icons/Close';
 import File from '../../icons/File';
 import Files from '../../icons/Files';
@@ -160,7 +161,7 @@ class AddTorrentsByFile extends React.Component {
           })}
         />
         <FormRow>
-          <Textbox
+          <Tags
             label={this.props.intl.formatMessage({
               id: 'torrents.add.tags',
               defaultMessage: 'Tags'

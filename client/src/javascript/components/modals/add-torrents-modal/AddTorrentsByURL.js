@@ -1,10 +1,11 @@
-import {Form, FormRow, Textbox} from 'flood-ui-kit';
+import {Form, FormRow} from 'flood-ui-kit';
 import {injectIntl} from 'react-intl';
 import React from 'react';
 
 import AddTorrentsActions from './AddTorrentsActions';
 
 import SettingsStore from '../../../stores/SettingsStore';
+import Tags from '../../general/form-elements/Tags';
 import TextboxRepeater from '../../general/form-elements/TextboxRepeater';
 import TorrentActions from '../../../actions/TorrentActions';
 import TorrentDestination from '../../general/filesystem/TorrentDestination';
@@ -78,7 +79,7 @@ class AddTorrentsByURL extends React.Component {
           })}
         />
         <FormRow>
-          <Textbox
+          <Tags
             id="tags"
             defaultValue={this.state.tags}
             label={this.props.intl.formatMessage({
