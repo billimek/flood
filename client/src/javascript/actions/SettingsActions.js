@@ -23,6 +23,22 @@ let SettingsActions = {
       });
   },
 
+  modifyFeed: (id, feed) => {
+    return axios.put(`${baseURI}api/feed-monitor/feeds/${id}`, feed)
+      .then((json = {}) => json.data)
+      .then((data) => {
+        AppDispatcher.dispatchServerAction({
+          type: ActionTypes.SETTINGS_FEED_MONITOR_FEED_MODIFY_SUCCESS,
+          data
+        });
+      }, (error) => {
+        AppDispatcher.dispatchServerAction({
+          type: ActionTypes.SETTINGS_FEED_MONITOR_FEED_MODiFY_ERROR,
+          error
+        });
+      });
+  },
+
   addRule: (rule) => {
     return axios.put(`${baseURI}api/feed-monitor/rules`, rule)
       .then((json = {}) => json.data)
@@ -66,6 +82,22 @@ let SettingsActions = {
       }, (error) => {
         AppDispatcher.dispatchServerAction({
           type: ActionTypes.SETTINGS_FEED_MONITOR_FEEDS_FETCH_ERROR,
+          error
+        });
+      });
+  },
+
+  fetchItems: (query) => {
+    return axios.get(`${baseURI}api/feed-monitor/items`, query)
+      .then((json = {}) => json.data)
+      .then((data) => {
+        AppDispatcher.dispatchServerAction({
+          type: ActionTypes.SETTINGS_FEED_MONITOR_ITEMS_FETCH_SUCCESS,
+          data
+        });
+      }, (error) => {
+        AppDispatcher.dispatchServerAction({
+          type: ActionTypes.SETTINGS_FEED_MONITOR_ITEMS_FETCH_ERROR,
           error
         });
       });

@@ -24,6 +24,17 @@ class FeedService {
     });
   }
 
+  modifyFeed(id, feed, callback) {
+    let modifiedFeed = this.feeds.find( (feed) => {
+      return feed.options._id === id;
+    });
+    modifiedFeed.stopReader();
+    modifiedFeed.modify(feed);
+    this.modifyItem(id, feed, (err) => {
+      callback(err);
+    });
+  }
+
   addItem(type, item, callback) {
     if (!this.isDBReady) {
       return;
@@ -36,6 +47,21 @@ class FeedService {
       }
 
       callback(newDoc);
+    });
+  }
+
+  modifyItem(id, newItem, callback) {
+    if (!this.isDBReady) {
+      return;
+    }
+
+    this.db.update({_id: id}, {$set: newItem}, {}, (err) => {
+      if (err) {
+        callback(null, err);
+        return;
+      }
+
+      callback(null);
     });
   }
 
@@ -92,6 +118,24 @@ class FeedService {
 
   getFeeds(query, callback) {
     this.queryItem('feed', query, callback);
+  }
+
+  getItems(query, callback) {
+    let feed = this.feeds.find((feed)=>{
+      return (feed.options._id===query.id);
+    });
+
+    if (feed){
+      if (query.search){
+        callback(feed.getItems().filter( (item) => {
+          return (item.title.toLowerCase().indexOf(query.search.toLowerCase()) !== -1);
+        }));
+      } else {
+        callback(feed.getItems());
+      }
+    } else {
+      callback(null);
+    }
   }
 
   getItemsMatchingRules(feedItems, rules, feed) {
