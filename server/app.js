@@ -13,6 +13,7 @@ const path = require('path');
 const app = express();
 const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
+const streamRoutes = require('./routes/stream');
 const paths = require('../client/config/paths');
 const Users = require('./models/Users');
 
@@ -35,6 +36,7 @@ require('./config/passport')(passport);
 
 app.use('/api', apiRoutes);
 app.use('/auth', authRoutes);
+app.use('/stream', streamRoutes);
 
 // After routes, look for static assets.
 app.use(express.static(paths.appBuild));

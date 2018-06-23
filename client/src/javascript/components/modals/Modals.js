@@ -11,6 +11,7 @@ import RemoveTorrentsModal from './remove-torrents-modal/RemoveTorrentsModal';
 import SetTagsModal from './set-tags-modal/SetTagsModal';
 import SettingsModal from './settings-modal/SettingsModal';
 import TorrentDetailsModal from './torrent-details-modal/TorrentDetailsModal';
+import StreamVideoModal from './stream-video-modal/StreamVideoModal';
 import UIActions from '../../actions/UIActions';
 import UIStore from '../../stores/UIStore';
 
@@ -32,7 +33,8 @@ export default class Modals extends React.Component {
       'remove-torrents': RemoveTorrentsModal,
       'set-taxonomy': SetTagsModal,
       settings: SettingsModal,
-      'torrent-details': TorrentDetailsModal
+      'torrent-details': TorrentDetailsModal,
+      'stream-video': StreamVideoModal,
     };
 
     this.state = {

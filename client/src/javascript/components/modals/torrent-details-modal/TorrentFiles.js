@@ -8,12 +8,15 @@ import ConfigStore from '../../../stores/ConfigStore';
 import Disk from '../../icons/Disk';
 import DirectoryTree from '../../general/filesystem/DirectoryTree';
 import TorrentStore from '../../../stores/TorrentStore';
+import UIActions from '../../../actions/UIActions';
+import streamableExtensions from '../../../../../../shared/constants/streamableExtensions';
 
 const TORRENT_PROPS_TO_CHECK = ['bytesDone'];
 const METHODS_TO_BIND = [
   'handleItemSelect',
   'handlePriorityChange',
-  'handleSelectAllClick'
+  'handleSelectAllClick',
+  'isSelectedStreamable'
 ];
 
 class TorrentFiles extends React.Component {
@@ -103,6 +106,21 @@ class TorrentFiles extends React.Component {
     link.click();
   };
 
+  handleStreamButtonClick = () => {
+    let fileName;
+    for (let name in this.state.selectedItems.files){
+      fileName = name;
+    }
+
+    UIActions.displayModal({
+      id: 'stream-video',
+      options: {
+        hash: this.props.torrent.hash,
+        file: fileName
+      }
+    });
+  }
+
   handleFormChange = ({event, formData}) => {
     if (event.target.name === 'file-priority') {
       this.handlePriorityChange();
@@ -133,6 +151,18 @@ class TorrentFiles extends React.Component {
     let selectedFiles = this.getSelectedFiles(selectedItems);
     this.setState({selectedItems, allSelected: !this.state.allSelected,
       selectedFiles});
+  }
+
+  isSelectedStreamable() {
+    if (this.state.selectedFiles.length !== 1)
+      return false;
+
+    let fileExtension;
+    for (let name in this.state.selectedItems.files){
+      fileExtension = name.split('.').pop();
+    }
+
+    return Object.keys(streamableExtensions).includes(fileExtension);
   }
 
   isLoaded() {
@@ -299,6 +329,14 @@ class TorrentFiles extends React.Component {
                   countElement: <span className="directory-tree__selection-toolbar__item-count">{this.state.selectedFiles.length}</span>
               }}/>
             </FormRowItem>
+            {this.isSelectedStreamable() &&
+              <Button onClick={this.handleStreamButtonClick} grow={false} shrink={false}>
+                <FormattedMessage
+                  id="torrents.details.files.stream.file"
+                  defaultMessage="Stream File"
+                />
+              </Button>
+            }
             <Button onClick={this.handleDownloadButtonClick} grow={false} shrink={false}>
               <FormattedMessage
                 id="torrents.details.files.download.file"
@@ -308,6 +346,7 @@ class TorrentFiles extends React.Component {
                   count: this.state.selectedFiles.length
                 }}/>
             </Button>
+
             <Select id="file-priority" persistentPlaceholder shrink={false}>
               <SelectItem placeholder>
                 <FormattedMessage

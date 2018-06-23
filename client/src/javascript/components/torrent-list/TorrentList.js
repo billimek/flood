@@ -20,6 +20,7 @@ import TorrentFilterStore from '../../stores/TorrentFilterStore';
 import TorrentStore from '../../stores/TorrentStore';
 import UIActions from '../../actions/UIActions';
 import UIStore from '../../stores/UIStore';
+import streamableExtensions from '../../../../../shared/constants/streamableExtensions';
 
 const MESSAGES = defineMessages({
   torrentListDependency: {
@@ -253,6 +254,15 @@ class TorrentListContainer extends React.Component {
         defaultMessage: 'Download'
       })
     }, {
+      action: 'stream',
+      clickHandler: (this.isTorrentStreamable(torrent)) ? (action, event) => {
+        clickHandler(action, event, torrent);
+      } : undefined,
+      label: this.props.intl.formatMessage({
+        id: 'torrents.list.context.stream',
+        defaultMessage: 'Stream'
+      })
+    }, {
       action: 'set-priority',
       clickHandler,
       dismissMenu: false,
@@ -296,6 +306,9 @@ class TorrentListContainer extends React.Component {
       case 'torrent-download-tar':
         this.handleTorrentDownload(torrent, event);
         break;
+      case 'stream':
+        this.handleStreamClick(torrent, event);
+        break;
       case 'set-priority':
         this.state.handleTorrentPriorityChange(event);
         break;
@@ -314,6 +327,22 @@ class TorrentListContainer extends React.Component {
       id: 'torrent-details',
       options: {hash: torrent.hash}
     });
+  }
+
+  handleStreamClick(torrent, event) {
+    UIActions.displayModal({
+      id: 'stream-video',
+      options: {hash: torrent.hash, file: torrent.name}
+    });
+  }
+
+  isTorrentStreamable(torrent){
+      if (torrent.isMultiFile)
+        return false;
+
+      let fileExtension = torrent.name.split('.').pop();
+
+      return Object.keys(streamableExtensions).includes(fileExtension);
   }
 
   handleTorrentDownload(torrent, event) {
