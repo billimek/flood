@@ -41,7 +41,7 @@ class StreamVideoModal extends React.Component {
     const baseURI = ConfigStore.getBaseURI();
     const address = window.location.protocol + '//' + window.location.host;
 
-    return `${address}/${baseURI}stream/stream?hash=${this.state.hash}&file=${encodeURIComponent(this.state.file)}`;
+    return `${address}${baseURI}stream/stream?hash=${this.state.hash}&file=${encodeURIComponent(this.state.file)}`;
   }
 
   handleCopyToClipboardClick = event => {

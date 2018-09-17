@@ -8,7 +8,6 @@ import ConfigStore from '../../../stores/ConfigStore';
 import Disk from '../../icons/Disk';
 import DirectoryTree from '../../general/filesystem/DirectoryTree';
 import TorrentStore from '../../../stores/TorrentStore';
-import UIActions from '../../../actions/UIActions';
 import streamableExtensions from '../../../../../../shared/constants/streamableExtensions';
 
 const TORRENT_PROPS_TO_CHECK = ['bytesDone'];
@@ -106,19 +105,24 @@ class TorrentFiles extends React.Component {
     link.click();
   };
 
-  handleStreamButtonClick = () => {
+  handleStreamButtonClick = (event) => {
+    event.preventDefault();
+
     let fileName;
     for (let name in this.state.selectedItems.files){
       fileName = name;
     }
 
-    UIActions.displayModal({
-      id: 'stream-video',
-      options: {
-        hash: this.props.torrent.hash,
-        file: fileName
-      }
-    });
+    event.preventDefault();
+    const baseURI = ConfigStore.getBaseURI();
+    const address = window.location.protocol + '//' + window.location.host;
+    const streamLink = `${address}${baseURI}stream/stream?hash=${this.props.torrent.hash}&file=${encodeURIComponent(fileName)}`;
+    let textField = document.createElement('textarea');
+    textField.innerText = streamLink;
+    document.body.appendChild(textField);
+    textField.select();
+    document.execCommand('copy');
+    textField.remove();
   }
 
   handleFormChange = ({event, formData}) => {
@@ -333,7 +337,7 @@ class TorrentFiles extends React.Component {
               <Button onClick={this.handleStreamButtonClick} grow={false} shrink={false}>
                 <FormattedMessage
                   id="torrents.details.files.stream.file"
-                  defaultMessage="Stream File"
+                  defaultMessage="Copy Stream Link"
                 />
               </Button>
             }

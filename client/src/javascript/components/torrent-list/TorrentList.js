@@ -254,13 +254,13 @@ class TorrentListContainer extends React.Component {
         defaultMessage: 'Download'
       })
     }, {
-      action: 'stream',
+      action: 'copy-stream',
       clickHandler: (this.isTorrentStreamable(torrent)) ? (action, event) => {
         clickHandler(action, event, torrent);
       } : undefined,
       label: this.props.intl.formatMessage({
         id: 'torrents.list.context.stream',
-        defaultMessage: 'Stream'
+        defaultMessage: 'Copy Stream Link'
       })
     }, {
       action: 'set-priority',
@@ -306,7 +306,7 @@ class TorrentListContainer extends React.Component {
       case 'torrent-download-tar':
         this.handleTorrentDownload(torrent, event);
         break;
-      case 'stream':
+      case 'copy-stream':
         this.handleStreamClick(torrent, event);
         break;
       case 'set-priority':
@@ -330,10 +330,16 @@ class TorrentListContainer extends React.Component {
   }
 
   handleStreamClick(torrent, event) {
-    UIActions.displayModal({
-      id: 'stream-video',
-      options: {hash: torrent.hash, file: torrent.name}
-    });
+    event.preventDefault();
+    const baseURI = ConfigStore.getBaseURI();
+    const address = window.location.protocol + '//' + window.location.host;
+    const streamLink = `${address}${baseURI}stream/stream?hash=${torrent.hash}&file=${encodeURIComponent(torrent.name)}`;
+    let textField = document.createElement('textarea');
+    textField.innerText = streamLink;
+    document.body.appendChild(textField);
+    textField.select();
+    document.execCommand('copy');
+    textField.remove();
   }
 
   isTorrentStreamable(torrent){
